@@ -1,0 +1,26 @@
+
+
+
+#titlediv{
+    background-color: brown;
+    color: aliceblue;
+    height: 20%;
+    margin: 1%;
+    text-align: center;
+    font-size: 40px;
+}
+
+table{
+    margin: 1%;
+    max-width: 80%;
+}
+
+#inputform{
+    margin:1%;
+    border: 3px;
+    border-style: double;
+    border-color: black;
+    border-spacing: 1%;
+    padding:2%;
+}
+
