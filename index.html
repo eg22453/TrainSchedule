@@ -14,7 +14,7 @@
 
 <body>
     <div id="titlediv">Anytime is Train time</div>
-    <table class="table" id ="traintable">
+    <table class="table" id="traintable">
         <thead>
             <tr>
                 <th scope="col">Train name</th>
@@ -25,13 +25,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <th scope="row">Red Express</th>
-                <td>Seattle</td>
-                <td>45</td>
-                <td>05:35PM</td>
-                <td>10</td>
-            </tr>
+
 
             <div id="addnewrows"></div>
         </tbody>
@@ -95,21 +89,49 @@
         let destination = ""
         let frequency = ""
         let firsttraintime = ""
+        let nextarrival;
 
 
 
         $("#trainsubmit").on("click", function (event) {
-            console.log("clicked button")
             event.preventDefault();
+            //console.log(moment().format('LT'));
+            //console.log(moment().format(' hh:mm a'))
 
             trainname = $("#inputtrainname").val().trim()
             destination = $("#destinationinput").val().trim()
-            firsttraintime = $("#inputtime").val().trim()
             frequency = $("#inputfrequency").val().trim()
+            nextarrival = moment().add(parseInt(frequency), 'minutes').format('hh:mm A');
 
-            console.log(frequency)
+            //getting first train time from user
+            firsttraintime = $("#inputtime").val().trim()
 
+            //push back first train time 1 year to ensure that it comes before the current time
+            let fttimeconvertedtopast = moment(firsttraintime, "HH:mm a").subtract(1, "years");
+            console.log(fttimeconvertedtopast)
 
+            let currenttime = moment();
+
+            //moment().format("hh:mm");
+
+            console.log(currenttime)
+
+            //get difference between the starting train time and current time in minutes
+
+            let difftime = moment().diff(moment(fttimeconvertedtopast), "minutes")
+
+            //remainder minute equation
+
+            let tremainder = difftime % parseInt(frequency)
+
+            //minutes until train
+
+            let tminutestilltrain = parseInt(frequency) - tremainder
+
+            //next train
+
+            let nexttrain = moment().add(tminutestilltrain, "minutes").format("hh:mm");
+            console.log(nexttrain)
 
             //code to handle push to firebase 
             database.ref().push({
@@ -117,6 +139,8 @@
                 destination: destination,
                 firsttraintime: firsttraintime,
                 frequency: frequency,
+                nexttrain: nexttrain,
+                tminutestilltrain: tminutestilltrain,
                 dateAdded: firebase.database.ServerValue.TIMESTAMP
             });
 
@@ -129,15 +153,19 @@
                 "<th scope='row'>" + childSnapshot.val().trainname + "</th>" +
                 "<td> " + childSnapshot.val().destination + " </td>" +
                 "<td> " + childSnapshot.val().frequency + " </td>" +
-                "<td> " + childSnapshot.val().frequency + " </td>" +
-                "<td> " + childSnapshot.val().frequency + " </td>" +
+                "<td> " + childSnapshot.val().nexttrain + " </td>" +
+                "<td> " + childSnapshot.val().tminutestilltrain + " </td>" +
                 "</tr>");
+
+
+
+               // moment().add(parseInt(childSnapshot.val().frequency), 'minutes').format(
+               // 'hh:mm A')   this would go above as a palceholder after frequency
 
             // Handle the errors
         }, function (errorObject) {
             console.log("Errors handled: " + errorObject.code);
         });
-        console.log(moment().format('LT'));
     </script>
 </body>
 
