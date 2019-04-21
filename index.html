@@ -1,0 +1,193 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="assets/style.css"
+    />
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.10.0/firebase.js"></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
+  </head>
+
+  <body>
+    <div id="titlediv">Anytime is Train time</div>
+    <table class="table" id="traintable">
+      <thead>
+        <tr>
+          <th scope="col">Train name</th>
+          <th scope="col">Destination</th>
+          <th scope="col">Frequency(min)</th>
+          <th scope="col">Next Arrival</th>
+          <th scope="col">Minutes Away</th>
+        </tr>
+      </thead>
+      <tbody>
+        <div id="addnewrows"></div>
+      </tbody>
+    </table>
+
+    <div id="inputform">
+      <form>
+        <div class="form-group">
+          <label>Train Name</label>
+          <input
+            class="form-control"
+            id="inputtrainname"
+            aria-describedby="emailHelp"
+            placeholder="Enter Train Name"
+          />
+        </div>
+        <div class="form-group">
+          <label>Destination</label>
+          <input class="form-control" id="destinationinput" />
+        </div>
+
+        <div class="form-group">
+          <label>Frequency</label>
+          <input class="form-control" id="inputfrequency" />
+        </div>
+
+        <div class="form-group">
+          <label>First Train Time (HH:mm Military Time)</label>
+          <input class="form-control" id="inputtime" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="trainsubmit">
+          Submit
+        </button>
+      </form>
+
+      <div id="test"></div>
+    </div>
+
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyAsbc8W1gndSktDT_EgLYLd0Jp2obA2Ppo",
+        authDomain: "trainschedule-de5b5.firebaseapp.com",
+        databaseURL: "https://trainschedule-de5b5.firebaseio.com",
+        projectId: "trainschedule-de5b5",
+        storageBucket: "trainschedule-de5b5.appspot.com",
+        messagingSenderId: "133111300921"
+      };
+
+      firebase.initializeApp(config);
+
+      var database = firebase.database();
+
+      //add some initial values for train schedule
+
+      let trainname = "";
+      let destination = "";
+      let frequency = "";
+      let firsttraintime = "";
+
+      $("#trainsubmit").on("click", function(event) {
+        event.preventDefault();
+        //console.log(moment().format('LT'));
+        //console.log(moment().format(' hh:mm a'))
+
+        trainname = $("#inputtrainname")
+          .val()
+          .trim();
+        destination = $("#destinationinput")
+          .val()
+          .trim();
+        frequency = $("#inputfrequency")
+          .val()
+          .trim();
+
+        //getting first train time from user
+        firsttraintime = $("#inputtime")
+          .val()
+          .trim();
+
+        //push back first train time 1 year to ensure that it comes before the current time
+        let fttimeconvertedtopast = moment(firsttraintime, "HH:mm a").subtract(
+          1,
+          "years"
+        );
+        //get difference between the starting train time and current time in minutes
+        let difftime = moment().diff(moment(fttimeconvertedtopast), "minutes");
+        //remainder minute equation
+        let tremainder = difftime % parseInt(frequency);
+        //minutes until train
+        let tminutestilltrain = parseInt(frequency) - tremainder;
+        //next train
+        let nexttrain = moment()
+          .add(tminutestilltrain, "minutes")
+          .format("hh:mm");
+
+        //code to handle push to firebase
+        database.ref().push({
+          trainname: trainname,
+          destination: destination,
+          firsttraintime: firsttraintime,
+          frequency: frequency,
+          nexttrain: nexttrain,
+          tminutestilltrain: tminutestilltrain,
+          dateAdded: firebase.database.ServerValue.TIMESTAMP
+        });
+      });
+
+      // Firebase watcher + initial loader HINT: This code behaves similarly to .on("value")
+      database.ref().on(
+        "child_added",
+        function(childSnapshot) {
+
+          console.log(childSnapshot.val())
+          // full list of items to the well
+          $("#traintable").append(
+            "<tr>" +
+              "<th scope='row'>" +
+              childSnapshot.val().trainname +
+              "</th>" +
+              "<td> " +
+              childSnapshot.val().destination +
+              " </td>" +
+              "<td> " +
+              childSnapshot.val().frequency +
+              " </td>" +
+              "<td> " +
+              childSnapshot.val().nexttrain +
+              " </td>" +
+              "<td> " +
+              childSnapshot.val().tminutestilltrain +
+              " </td>" +
+              "</tr>"
+          );
+
+          // moment().add(parseInt(childSnapshot.val().frequency), 'minutes').format(
+          // 'hh:mm A')   this would go above as a palceholder after frequency
+
+          // Handle the errors
+        },
+        function(errorObject) {
+          console.log("Errors handled: " + errorObject.code);
+        }
+      );
+
+      setInterval(function() {
+        let currenttime = moment();
+        trainname
+
+        // your code goes here...
+      }, 60 * 1000); //
+
+      database.ref().on("value", function(snapshot) {
+        //put some code here to trigger every time database is changed
+        let currenttime = moment();
+      });
+    </script>
+  </body>
+</html>
