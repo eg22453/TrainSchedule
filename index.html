@@ -144,6 +144,8 @@
       database.ref().on(
         "child_added",
         function(childSnapshot) {
+
+          console.log(childSnapshot.val())
           // full list of items to the well
           $("#traintable").append(
             "<tr>" +
@@ -184,6 +186,7 @@
 
       database.ref().on("value", function(snapshot) {
         //put some code here to trigger every time database is changed
+        let currenttime = moment();
       });
     </script>
   </body>
